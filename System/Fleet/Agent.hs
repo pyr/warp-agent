@@ -14,6 +14,14 @@ import qualified Data.ByteString.Lazy as BL
 import qualified Data.Aeson as A
 import qualified Data.Map as M
 
+redis_publish conn rid host output = do
+  let resp = Response { res_id = rid
+                      , res_host = host
+                      , res_output = output}
+  let resdata = B.concat $ BL.toChunks $ A.encode resp
+  runRedis conn $ publish (BC.pack $ ("fleet:res:" ++ rid)) resdata
+  return ()
+
 redis_ack conn rid payload = do
   let jdata = B.concat $ BL.toChunks $ A.encode payload
   let chan = "fleet:ack:" ++ (rid :: String)
@@ -27,13 +35,8 @@ redis_run_request conn host req = do
                         , ack_status = AckStart }
   let jdata = B.concat $ BL.toChunks $ A.encode ack_payload
   runRedis conn $ publish (BC.pack $ ("fleet:ack:" ++ rid)) jdata
-  output <- runScript script
-  let resp = Response { res_id = rid
-                      , res_host = host
-                      , res_output = output }
-  let resdata = B.concat $ BL.toChunks $ A.encode resp
-  runRedis conn $ publish (BC.pack $ ("fleet:res:" ++ rid)) resdata
-  return ()
+  runScript script (redis_publish conn rid host)
+  return mempty
 
 
 redis_match_request conn host box req = do

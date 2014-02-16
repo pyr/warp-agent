@@ -19,17 +19,21 @@ instance FromJSON Matcher where
   parseJSON _ = fail "invalid matcher"
 
 instance FromJSON ServiceAction where
-  parseJSON (String "start") = pure ServiceStart
-  parseJSON (String "restart") = pure ServiceRestart
-  parseJSON (String "stop") = pure ServiceStop
-  parseJSON (String "status") = pure ServiceStatus
+  parseJSON (String action) = case action of
+                                   "start" -> pure ServiceStart
+                                   "restart" -> pure ServiceRestart
+                                   "stop" -> pure ServiceStop
+                                   "status" -> pure ServiceStatus
 
 instance FromJSON Command where
   parseJSON (String "ping") = pure PingCommand
-  parseJSON (Object o) | member "shell" o = ShCommand <$> o .: "shell"
+  parseJSON (Object o) | member "exits" o = ShCommand <$> o .: "shell"
+                                                      <*> o .: "exits"
+                       | member "shell" o = ShCommand <$> o .: "shell"
+                                                      <*> pure [0]
                        | member "sleep" o = SleepCommand <$> o .: "sleep"
-                       | member "service" o = ServiceCommand <$> o .: "service"
-                                                             <*> o .: "action"
+                       | member "service" o = ServiceCommand <$> o .: "action"
+                                                             <*> o .: "service"
                        | otherwise = empty
 
 instance FromJSON Request where
@@ -40,6 +44,19 @@ instance FromJSON Request where
                                  <*> o .: "script"
   parseJSON _ = fail "Failed to parse request!"
 
+instance ToJSON CommandOutput where
+  toJSON (CommandSuccess code out err) =
+    object [ "status" .= String "success",
+             "code"   .= code,
+             "stdout" .= out,
+             "stderr" .= err]
+  toJSON (CommandFailure code out err) =
+    object [ "status" .= String "failure",
+             "code"   .= code,
+             "stdout" .= out,
+             "stderr" .= err]
+  toJSON CommandFinished =
+    object [ "status" .= String "finished" ]
 
 instance ToJSON Response where
   toJSON Response{ res_id     = id

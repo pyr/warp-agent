@@ -4,6 +4,7 @@ import System.Fleet.Payload
 import System.Process
 import System.Exit
 import Control.Concurrent
+import Data.List(elem)
 
 serviceAction :: ServiceAction -> String
 serviceAction ServiceStop  = "stop"
@@ -11,39 +12,48 @@ serviceAction ServiceStart  = "start"
 serviceAction ServiceRestart  = "restart"
 serviceAction ServiceStatus  = "status"
 
-runRequestCommand :: Command -> IO (Int, String, String)
+runRequestCommand :: Command -> IO (CommandOutput)
 
 runRequestCommand PingCommand = do
-  return (0, "alive", "")
+  return (CommandSuccess 0 "alive" "")
 
 runRequestCommand (SleepCommand amount) = do
   threadDelay (fromIntegral (amount * 1000000) :: Int)
-  return (0, "slept well", "")
+  return (CommandSuccess 0 "slept well" "")
 
-runRequestCommand (ShCommand script) = do
+runRequestCommand (ShCommand script exits) = do
   (exit,out,err) <- readProcessWithExitCode "bash" ["-c", script] []
   case exit of
-    ExitSuccess -> return (0, out, err)
-    (ExitFailure code) -> return (code, out, err)
+    ExitSuccess -> return (CommandSuccess 0 out err)
+    (ExitFailure code) -> if (elem code exits) then
+                             return (CommandSuccess code out err)
+                          else
+                            return (CommandFailure code out err)
 
-runRequest (ServiceCommand action service) = do
+runRequestCommand (ServiceCommand action service) = do
   (exit, out, err) <- readProcessWithExitCode "service"
-                      [serviceAction action, service] []
+                      [service, serviceAction action] []
   case exit of
-    ExitSuccess -> return (0, out, err)
-    (ExitFailure code) -> return (code, out, err)
+    ExitSuccess -> return (CommandSuccess 0 out err)
+    (ExitFailure code) -> return (CommandFailure code out err)
 
 
-runScript :: [Command] -> IO ([(Int, String, String)])
+runNext :: CommandOutput -> (CommandOutput -> IO ()) -> [Command] -> IO ()
 
-runScript [] = do
-  return []
+runNext (CommandSuccess code out err) reporter commands = do
+  reporter (CommandSuccess code out err)
+  runScript commands reporter
+  return ()
 
-runScript (cmd:commands) = do
+runNext (CommandFailure code out err) reporter commands = do
+  reporter (CommandFailure code out err)
+
+runScript :: [Command] -> (CommandOutput -> IO ()) -> IO ()
+
+runScript [] reporter = do
+  reporter CommandFinished
+
+runScript (cmd:commands) reporter = do
+  putStrLn $ "running: " ++ (show cmd)
   output <- runRequestCommand cmd
-  let (code, _, _)  = output
-  if code == 0 then do
-      next <- runScript commands
-      return (output:next)
-  else
-    return [output]
+  runNext output reporter commands

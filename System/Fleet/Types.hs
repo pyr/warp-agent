@@ -12,7 +12,7 @@ data ServiceAction = ServiceStop |
 
 data Command = PingCommand |
                SleepCommand Integer |
-               ShCommand String |
+               ShCommand String [Int] |
                ServiceCommand ServiceAction String deriving (Show, Read)
 
 data Script = Script String [Command]
@@ -24,6 +24,10 @@ data Matcher = MatchAll |
                MatchOr [Matcher] |
                MatchAnd [Matcher] deriving (Show, Read)
 
+data CommandOutput = CommandSuccess Int String String
+                   | CommandFailure Int String String
+                   | CommandFinished deriving (Show, Read)
+
 data Request = Request { rq_id         :: GenId
                        , rq_match      :: Matcher
                        , rq_timeout    :: Integer
@@ -33,7 +37,7 @@ data Request = Request { rq_id         :: GenId
 
 data Response = Response { res_id     :: GenId
                          , res_host   :: String
-                         , res_output :: [(Int, String, String)]
+                         , res_output :: CommandOutput
                          } deriving (Show, Read)
 
 data AckStatus = AckStart |

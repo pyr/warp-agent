@@ -11,7 +11,7 @@ toFact (fname:(_:fdata)) = (fname,(concat $ intersperse " " fdata))
 
 fetchFacts :: IO (Facts)
 fetchFacts = do
-  output <- readProcess "rvm" ["2.0.0", "do", "facter"] []
+  output <- readProcess "facter" [] []
   let facts = [toFact (words l) | l <- lines output, isInfixOf "=>" l]
   return (fromList facts)
 
