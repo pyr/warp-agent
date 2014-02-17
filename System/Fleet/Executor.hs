@@ -54,6 +54,5 @@ runScript [] reporter = do
   reporter CommandFinished
 
 runScript (cmd:commands) reporter = do
-  putStrLn $ "running: " ++ (show cmd)
   output <- runRequestCommand cmd
   runNext output reporter commands

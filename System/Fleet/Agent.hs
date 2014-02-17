@@ -55,7 +55,6 @@ redis_match_request conn host box req = do
 redis_msg conn host box payload = do
   let to_decode = BL.fromChunks [(msgMessage payload)]
   let msg = (A.decode $ to_decode) :: Maybe Request
-  putStrLn $ show msg
   case msg of
     Nothing -> do { return ()}
     Just req -> redis_match_request conn host box req
