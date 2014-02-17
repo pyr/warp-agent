@@ -64,8 +64,8 @@ redis_msg conn host box payload = do
 redis_listen :: MVar Facts -> String -> String -> Integer -> IO ()
 redis_listen factbox host redis_host redis_portnum = do
   let redis_port = (PortNumber (fromIntegral redis_portnum))
-  let (ConnInfo _ _ auth max_conn max_idle) = defaultConnectInfo
-  let ci = (ConnInfo redis_host redis_port auth max_conn max_idle)
+  let (ConnInfo _ _ auth db max_conn max_idle) = defaultConnectInfo
+  let ci = (ConnInfo redis_host redis_port auth db max_conn max_idle)
   cx <- connect ci
   runRedis cx $ pubSub (psubscribe ["fleetreq:*"]) (redis_msg cx host factbox)
 
