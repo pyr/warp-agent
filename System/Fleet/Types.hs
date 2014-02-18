@@ -12,7 +12,7 @@ data ServiceAction = ServiceStop |
 
 data Command = PingCommand |
                SleepCommand Integer |
-               ShCommand String [Int] |
+               ShCommand String String [Int] |
                ServiceCommand ServiceAction String deriving (Show, Read)
 
 data Script = Script String [Command]

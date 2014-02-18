@@ -3,6 +3,7 @@ import System.Fleet.Types
 import System.Fleet.Payload
 import System.Process
 import System.Exit
+import System.Posix.Directory
 import Control.Concurrent
 import Data.List(elem)
 
@@ -21,14 +22,24 @@ runRequestCommand (SleepCommand amount) = do
   threadDelay (fromIntegral (amount * 1000000) :: Int)
   return (CommandSuccess 0 "slept well" "")
 
-runRequestCommand (ShCommand script exits) = do
+runRequestCommand (ShCommand script cwd exits) = do
+  current_wd <- getWorkingDirectory
+  if cwd /= "." then
+    changeWorkingDirectory cwd
+  else
+    do {return () }
   (exit,out,err) <- readProcessWithExitCode "bash" ["-c", script] []
+  if cwd /= "." then
+    changeWorkingDirectory current_wd
+  else
+    do {return ()}
   case exit of
     ExitSuccess -> return (CommandSuccess 0 out err)
     (ExitFailure code) -> if (elem code exits) then
                              return (CommandSuccess code out err)
                           else
                             return (CommandFailure code out err)
+
 
 runRequestCommand (ServiceCommand action service) = do
   (exit, out, err) <- readProcessWithExitCode "service"

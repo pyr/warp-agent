@@ -27,9 +27,18 @@ instance FromJSON ServiceAction where
 
 instance FromJSON Command where
   parseJSON (String "ping") = pure PingCommand
-  parseJSON (Object o) | member "exits" o = ShCommand <$> o .: "shell"
+  parseJSON (String sh) = pure (ShCommand (T.unpack sh) "." [0])
+  parseJSON (Object o) | (member "exits" o && member "cwd" o) = ShCommand <$> o .: "shell"
+                                                                          <*> o .: "cwd"
+                                                                          <*> o .: "exits"
+                       | member "cwd" o = ShCommand <$> o .: "shell"
+                                                    <*> o .: "cwd"
+                                                    <*> pure [0]
+                       | member "exits" o = ShCommand <$> o .: "shell"
+                                                      <*> pure "."
                                                       <*> o .: "exits"
                        | member "shell" o = ShCommand <$> o .: "shell"
+                                                      <*> pure "."
                                                       <*> pure [0]
                        | member "sleep" o = SleepCommand <$> o .: "sleep"
                        | member "service" o = ServiceCommand <$> o .: "action"
