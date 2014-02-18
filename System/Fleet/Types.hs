@@ -47,3 +47,9 @@ data Ack = Ack { ack_id     :: GenId
                , ack_host   :: String
                , ack_status :: AckStatus
                } deriving (Show, Read)
+
+data FleetConfig = FleetConfig { cacert     :: String
+                               , privkey    :: String
+                               , redis_host :: String
+                               , redis_port :: Integer
+                               } deriving (Show, Read)

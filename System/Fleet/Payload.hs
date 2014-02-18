@@ -82,3 +82,9 @@ instance ToJSON AckStatus where
 instance ToJSON Ack where
   toJSON Ack{ack_id = id, ack_host = host, ack_status = status } =
     object [ "id" .= id, "host" .= host, "status" .= status ]
+
+instance FromJSON FleetConfig where
+  parseJSON (Object o) = FleetConfig <$> o .: "cacert"
+                                     <*> o .: "privkey"
+                                     <*> o .: "redis_host"
+                                     <*> o .: "redis_port"
