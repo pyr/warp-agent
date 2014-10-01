@@ -2,19 +2,24 @@ module Main where
 import System.Fleet.Agent
 import System.Fleet.Facts
 import System.Fleet.Config
+import System.Fleet.Args
 import System.Fleet.Types
 import Network.HostName
 import System.Environment
+import Options.Applicative
+import Data.List(break)
 
-get_conf_path :: [String] -> String
-get_conf_path [] = "/etc/fleet-agent.conf"
-get_conf_path (path:_) = path
+opts :: ParserInfo FleetArguments
+opts = info (parseArgs <**> helper)
+  ( fullDesc
+    <> progDesc "Execute a worker agent for fleet"
+    <> header "fleet-agent" )
 
 main :: IO ()
 main = do
-  args <- getArgs
-  config <- configure $ get_conf_path args
-  case config of
+  args <- execParser opts
+  cfg <- configure $ config args
+  case cfg of
    Left err -> error $ "Unable to parse configuration: " ++ err
    Right conf -> do
      let (FleetConfig { cacert = cacert
