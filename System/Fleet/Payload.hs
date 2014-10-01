@@ -86,5 +86,5 @@ instance ToJSON Ack where
 instance FromJSON FleetConfig where
   parseJSON (Object o) = FleetConfig <$> o .: "cacert"
                                      <*> o .: "privkey"
-                                     <*> o .: "redis_host"
-                                     <*> o .: "redis_port"
+                                     <*> o .:? "redis_host" .!= "localhost"
+                                     <*> o .:? "redis_port" .!= 6379
