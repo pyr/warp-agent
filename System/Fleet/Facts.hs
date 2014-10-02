@@ -2,6 +2,7 @@
 module System.Fleet.Facts(fetchFacts, startFactThread) where
 import System.Fleet.Types
 import System.Process
+import Control.Monad(forever)
 import Control.Concurrent.MVar
 import Control.Concurrent(forkIO, threadDelay)
 import Data.List(intersperse, isInfixOf)
