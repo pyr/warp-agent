@@ -22,8 +22,8 @@ startFactThread = do
   facts <- fetchFacts
   putMVar box facts
   forkIO $ forever $ do
+    threadDelay (60 * 1000000)
     _ <- takeMVar box
     facts <- fetchFacts
     putMVar box facts
-    threadDelay (60 * 1000000)
   return box
