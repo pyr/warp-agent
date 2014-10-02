@@ -20,7 +20,7 @@ startFactThread = do
   box <- newEmptyMVar
   facts <- fetchFacts
   putMVar box facts
-  forkIO $ do
+  forkIO $ forever $ do
     _ <- takeMVar box
     facts <- fetchFacts
     putMVar box facts
