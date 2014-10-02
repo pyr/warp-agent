@@ -53,3 +53,6 @@ data FleetConfig = FleetConfig { cacert     :: String
                                , redis_host :: String
                                , redis_port :: Integer
                                } deriving (Show, Read)
+
+data FleetArguments = FleetArguments { config :: FilePath
+                                     } deriving (Show, Read)
