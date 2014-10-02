@@ -11,3 +11,12 @@ parseArgs = FleetArguments
               <> metavar "FILE"
               <> help "Configuration file"
               <> value "/etc/fleet-agent.conf" )
+            <*> flag Normal Verbose
+            ( long "verbose"
+              <> short 'v'
+              <> help "Display more messages" )
+            <*> (optional $ strOption
+                 ( long "logfile"
+                   <> short 'l'
+                   <> metavar "FILE"
+                   <> help "Log to file FILE" ))

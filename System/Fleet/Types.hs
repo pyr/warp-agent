@@ -54,5 +54,8 @@ data FleetConfig = FleetConfig { cacert     :: String
                                , redis_port :: Integer
                                } deriving (Show, Read)
 
-data FleetArguments = FleetArguments { config :: FilePath
+data Verbosity = Normal | Verbose deriving (Show, Read)
+data FleetArguments = FleetArguments { config    :: FilePath
+                                     , verbosity :: Verbosity
+                                     , logfile   :: Maybe FilePath
                                      } deriving (Show, Read)
