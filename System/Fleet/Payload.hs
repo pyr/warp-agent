@@ -47,7 +47,7 @@ instance FromJSON Command where
 
 instance FromJSON Request where
   parseJSON (Object o) = Request <$> o .: "id"
-                                 <*> o .: "match"
+                                 <*> o .:? "match" .!= MatchAll
                                  <*> o .: "timeout"
                                  <*> o .: "script_name"
                                  <*> o .: "script"
