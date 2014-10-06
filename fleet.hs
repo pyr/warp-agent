@@ -8,9 +8,15 @@ import Network.HostName
 import System.Environment
 import Options.Applicative
 import Data.List(break)
+import Control.Concurrent.MVar (takeMVar, putMVar)
+import qualified Data.Map as M
 
 import System.IO (stderr)
-import System.Log.Logger (updateGlobalLogger, rootLoggerName, addHandler, removeHandler, setLevel, traplogging, Priority(DEBUG, INFO, ERROR))
+import System.Log.Logger (updateGlobalLogger, rootLoggerName,
+                          addHandler, removeHandler,
+                          setLevel, traplogging,
+                          infoM,
+                          Priority(DEBUG, INFO, ERROR))
 import System.Log.Handler (setFormatter)
 import System.Log.Handler.Simple (fileHandler, streamHandler)
 import System.Log.Formatter (simpleLogFormatter)
@@ -58,7 +64,13 @@ main = do
                       , redis_host = redis_host
                       , redis_port = redis_port}) = conf
 
-     hostname <- getHostName
      traplogging "Fleet.main" ERROR "A fatal exception occurred" $ do
        factbox <- startFactThread
-       redis_listen factbox hostname redis_host redis_port cacert privkey
+       facts <- takeMVar factbox
+       hostname <- return $ M.lookup "fqdn" facts
+       putMVar factbox facts
+       case hostname of
+         Nothing -> error $ "Unable to get FQDN from facts"
+         Just fqdn -> do
+           infoM "Fleet.main" $ "My hostname is " ++ fqdn
+           redis_listen factbox fqdn redis_host redis_port cacert privkey
