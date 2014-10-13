@@ -92,5 +92,6 @@ redis_listen factbox host redis_host redis_portnum cacert privkey = do
   let (ConnInfo _ _ auth db max_conn max_idle) = defaultConnectInfo
   let ci = (ConnInfo redis_host redis_port auth db max_conn max_idle)
   infoM "Fleet.Agent" $ "Connect to redis host " ++ redis_host ++ ":" ++ (show redis_portnum)
-  cx <- connect ci
-  runRedis cx $ pubSub (psubscribe ["fleetreq:*"]) (redis_msg cx host factbox cacert privkey)
+  cx1 <- connect ci
+  cx2 <- connect ci
+  runRedis cx1 $ pubSub (psubscribe ["fleetreq:*"]) (redis_msg cx2 host factbox cacert privkey)
