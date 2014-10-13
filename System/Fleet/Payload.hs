@@ -24,6 +24,7 @@ instance FromJSON ServiceAction where
                                    "restart" -> pure ServiceRestart
                                    "stop" -> pure ServiceStop
                                    "status" -> pure ServiceStatus
+                                   "reload" -> pure ServiceReload
 
 instance FromJSON Command where
   parseJSON (String "ping") = pure PingCommand
