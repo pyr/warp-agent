@@ -89,8 +89,8 @@ redis_msg conn host box cacert privkey payload = do
 redis_listen :: MVar Facts -> String -> String -> Integer -> String -> String -> IO ()
 redis_listen factbox host redis_host redis_portnum cacert privkey = do
   let redis_port = (PortNumber (fromIntegral redis_portnum))
-  let (ConnInfo _ _ auth db max_conn max_idle) = defaultConnectInfo
-  let ci = (ConnInfo redis_host redis_port auth db max_conn max_idle)
+  let (ConnInfo _ _ auth db max_conn _) = defaultConnectInfo
+  let ci = (ConnInfo redis_host redis_port auth db max_conn 600)
   infoM "Fleet.Agent" $ "Connect to redis host " ++ redis_host ++ ":" ++ (show redis_portnum)
   cx <- connect ci
   runRedis cx $ pubSub (psubscribe ["fleetreq:*"]) (redis_msg cx host factbox cacert privkey)
