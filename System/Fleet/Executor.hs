@@ -12,6 +12,7 @@ serviceAction ServiceStop  = "stop"
 serviceAction ServiceStart  = "start"
 serviceAction ServiceRestart  = "restart"
 serviceAction ServiceStatus  = "status"
+serviceAction ServiceReload = "reload"
 
 runRequestCommand :: Command -> IO (CommandOutput)
 

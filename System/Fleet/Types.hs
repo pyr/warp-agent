@@ -8,6 +8,7 @@ type GenId = String
 data ServiceAction = ServiceStop |
                      ServiceStart |
                      ServiceRestart |
+                     ServiceReload |
                      ServiceStatus deriving (Show, Read)
 
 data Command = PingCommand |
