@@ -1,4 +1,4 @@
-module System.Fleet.Signature where
+module System.Warp.Signature where
 import Network.TLS.Extra
 import Network.TLS
 import Codec.Crypto.RSA

@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
-module System.Fleet.Payload where
+module System.Warp.Payload where
 import Control.Applicative
 import Data.Aeson
-import System.Fleet.Types
+import System.Warp.Types
 import Data.HashMap.Strict (member)
 import qualified Data.Text as T
 import qualified Data.ByteString.Lazy as B
@@ -84,8 +84,8 @@ instance ToJSON Ack where
   toJSON Ack{ack_id = id, ack_host = host, ack_status = status } =
     object [ "id" .= id, "host" .= host, "status" .= status ]
 
-instance FromJSON FleetConfig where
-  parseJSON (Object o) = FleetConfig <$> o .: "cacert"
+instance FromJSON WarpConfig where
+  parseJSON (Object o) = WarpConfig <$> o .: "cacert"
                                      <*> o .: "privkey"
                                      <*> o .:? "redis_host" .!= "localhost"
                                      <*> o .:? "redis_port" .!= 6379

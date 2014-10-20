@@ -1,4 +1,4 @@
-module System.Fleet.Types where
+module System.Warp.Types where
 import Data.Map(Map)
 
 type Facts = Map String String
@@ -49,14 +49,14 @@ data Ack = Ack { ack_id     :: GenId
                , ack_status :: AckStatus
                } deriving (Show, Read)
 
-data FleetConfig = FleetConfig { cacert     :: String
+data WarpConfig = WarpConfig { cacert     :: String
                                , privkey    :: String
                                , redis_host :: String
                                , redis_port :: Integer
                                } deriving (Show, Read)
 
 data Verbosity = Normal | Verbose deriving (Show, Read)
-data FleetArguments = FleetArguments { config    :: FilePath
+data WarpArguments = WarpArguments { config    :: FilePath
                                      , verbosity :: Verbosity
                                      , logfile   :: Maybe FilePath
                                      } deriving (Show, Read)

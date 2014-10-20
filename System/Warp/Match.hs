@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
-module System.Fleet.Match where
-import System.Fleet.Types
+module System.Warp.Match where
+import System.Warp.Types
 import System.Process
 import Data.List(intersperse, isInfixOf, find, null)
 import qualified Data.Map as M

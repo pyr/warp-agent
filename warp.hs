@@ -1,9 +1,9 @@
 module Main where
-import System.Fleet.Agent
-import System.Fleet.Facts
-import System.Fleet.Config
-import System.Fleet.Args
-import System.Fleet.Types
+import System.Warp.Agent
+import System.Warp.Facts
+import System.Warp.Config
+import System.Warp.Args
+import System.Warp.Types
 import Network.HostName
 import System.Environment
 import Options.Applicative
@@ -21,14 +21,14 @@ import System.Log.Handler (setFormatter)
 import System.Log.Handler.Simple (fileHandler, streamHandler)
 import System.Log.Formatter (simpleLogFormatter)
 
-opts :: ParserInfo FleetArguments
+opts :: ParserInfo WarpArguments
 opts = info (parseArgs <**> helper)
   ( fullDesc
-    <> progDesc "Execute a worker agent for fleet"
-    <> header "fleet-agent" )
+    <> progDesc "Execute a worker agent for warp"
+    <> header "warp-agent" )
 
 -- Logging configuration
-configureLogging :: FleetArguments -> IO ()
+configureLogging :: WarpArguments -> IO ()
 configureLogging cfg = do
   h <- streamHandler stderr DEBUG >>=
        \lh -> return $ setFormatter lh (simpleLogFormatter "$time $loggername [$prio] $msg")
@@ -59,12 +59,12 @@ main = do
   case cfg of
    Left err -> error $ "Unable to parse configuration: " ++ err
    Right conf -> do
-     let (FleetConfig { cacert = cacert
+     let (WarpConfig { cacert = cacert
                       , privkey = privkey
                       , redis_host = redis_host
                       , redis_port = redis_port}) = conf
 
-     traplogging "Fleet.main" ERROR "A fatal exception occurred" $ do
+     traplogging "Warp.main" ERROR "A fatal exception occurred" $ do
        factbox <- startFactThread
        facts <- takeMVar factbox
        hostname <- return $ M.lookup "fqdn" facts
@@ -72,5 +72,5 @@ main = do
        case hostname of
          Nothing -> error $ "Unable to get FQDN from facts"
          Just fqdn -> do
-           infoM "Fleet.main" $ "My hostname is " ++ fqdn
+           infoM "Warp.main" $ "My hostname is " ++ fqdn
            redis_listen factbox fqdn redis_host redis_port cacert privkey

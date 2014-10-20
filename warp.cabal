@@ -1,8 +1,8 @@
-name:                fleet
+name:                warp
 version:             0.5.0
 synopsis:            distributed command and control
 -- description:         
-homepage:            https://github.com/pyr/fleet-agent
+homepage:            https://github.com/pyr/warp-agent
 license:             MIT
 license-file:        LICENSE
 author:              Pierre-Yves Ritschard
@@ -13,11 +13,11 @@ build-type:          Simple
 -- extra-source-files:  
 cabal-version:       >=1.10
 
-executable fleet-agent
-  main-is:             fleet.hs
+executable warp-agent
+  main-is:             warp.hs
   -- other-modules:       
   -- other-extensions:    
-  build-depends:       base >=4.6 && <4.7, hedis >= 0.6.5, aeson >= 0.6.1.0,
+  build-depends:       base >=4.7, hedis >= 0.6.5, aeson >= 0.6.1.0,
                        bytestring >= 0.10.0.2, unordered-containers >= 0.2.3.3,
                        hashmap >= 1.3.0.1, text >= 0.11.2.3,
                        process >= 1.1.0.2, containers >= 0.5.0.0,

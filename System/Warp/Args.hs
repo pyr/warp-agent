@@ -1,16 +1,16 @@
-module System.Fleet.Args where
-import System.Fleet.Types
+module System.Warp.Args where
+import System.Warp.Types
 import Options.Applicative
 import Options.Applicative.Arrows
 
-parseArgs :: Parser FleetArguments
-parseArgs = FleetArguments
+parseArgs :: Parser WarpArguments
+parseArgs = WarpArguments
             <$> strOption
             ( long "config"
               <> short 'f'
               <> metavar "FILE"
               <> help "Configuration file"
-              <> value "/etc/fleet-agent.conf" )
+              <> value "/etc/warp-agent.conf" )
             <*> flag Normal Verbose
             ( long "verbose"
               <> short 'v'
