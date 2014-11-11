@@ -9,6 +9,7 @@ import qualified Data.ByteString.Lazy as B
 
 instance FromJSON Matcher where
   parseJSON (String "all") = pure MatchAll
+  parseJSON (String "none") = pure MatchNone
   parseJSON (Object o) | member "or" o    = MatchOr <$> o .: "or"
                        | member "and" o   = MatchAnd <$> o .: "and"
                        | member "not" o   = MatchNot <$> o .: "not"

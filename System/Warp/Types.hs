@@ -19,6 +19,7 @@ data Command = PingCommand |
 data Script = Script String [Command]
 
 data Matcher = MatchAll |
+               MatchNone |
                MatchHost String |
                MatchFact String String |
                MatchNot Matcher |

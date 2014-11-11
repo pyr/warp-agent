@@ -9,6 +9,8 @@ runMatch :: String -> Facts -> Matcher -> Bool
 
 runMatch _ _ MatchAll = True
 
+runMatch _ _ MatchNone = True
+
 runMatch host _ (MatchHost candidate) = (host == candidate)
 
 runMatch _ facts (MatchFact key val) = case M.lookup key facts of
