@@ -2,10 +2,13 @@ module System.Warp.Executor (runScript) where
 import System.Warp.Types
 import System.Warp.Payload
 import System.Process
+import System.IO
+import System.Posix.IO
 import System.Exit
 import System.Posix.Directory
 import Control.Concurrent
 import Data.List(elem)
+import qualified Control.Exception as C
 
 serviceAction :: ServiceAction -> String
 serviceAction ServiceStop  = "stop"
@@ -13,6 +16,36 @@ serviceAction ServiceStart  = "start"
 serviceAction ServiceRestart  = "restart"
 serviceAction ServiceStatus  = "status"
 serviceAction ServiceReload = "reload"
+
+readProcessMixedWithExitCode
+    :: FilePath                -- ^ command to run
+    -> [String]                 -- ^ any arguments
+    -> IO (ExitCode,String)     -- ^ exitcode, stdout, stderr
+readProcessMixedWithExitCode cmd args = do
+  (p_r, p_w) <- createPipe
+  h_r <- fdToHandle p_r
+  h_w <- fdToHandle p_w
+  (Just inh, _, _, pid) <- createProcess (proc cmd args) {
+                                     std_in  = CreatePipe,
+                                     std_out = UseHandle h_w,
+                                     std_err = UseHandle h_w }
+  outMVar <- newEmptyMVar
+
+  -- fork off a thread to start consuming stdout
+  out  <- hGetContents h_r
+  _ <- forkIO $ C.evaluate (length out) >> putMVar outMVar ()
+
+  -- now write and flush any input
+  hClose inh -- done with stdin
+
+  -- wait on the output
+  takeMVar outMVar
+  hClose h_r
+
+  -- wait on the process
+  ex <- waitForProcess pid
+
+  return (ex, out)
 
 runRequestCommand :: Command -> IO (CommandOutput)
 
@@ -29,17 +62,17 @@ runRequestCommand (ShCommand script cwd exits) = do
     changeWorkingDirectory cwd
   else
     do {return () }
-  (exit,out,err) <- readProcessWithExitCode "bash" ["-c", script] []
+  (exit,out) <- readProcessMixedWithExitCode "bash" ["-c", script]
   if cwd /= "." then
     changeWorkingDirectory current_wd
   else
     do {return ()}
   case exit of
-    ExitSuccess -> return (CommandSuccess 0 out err)
+    ExitSuccess -> return (CommandSuccess 0 out "")
     (ExitFailure code) -> if (elem code exits) then
-                             return (CommandSuccess code out err)
+                             return (CommandSuccess code out "")
                           else
-                            return (CommandFailure code out err)
+                            return (CommandFailure code out "")
 
 
 runRequestCommand (ServiceCommand action service) = do
